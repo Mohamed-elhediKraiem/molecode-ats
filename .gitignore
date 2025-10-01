@@ -1,0 +1,22 @@
+# Node
+node_modules
+npm-debug.log
+yarn-error.log
+.pnpm-debug.log
+
+# Next.js
+.next
+out
+
+# Prisma
+prisma/generated
+*.db-journal
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs
+*.log
