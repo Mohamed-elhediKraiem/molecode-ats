@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
+import DonutChart from "./components/DonutChart";
+import ApplicationTrends from "./components/LineChart";
 
 // ---- Styles utilitaires ---- //
 const getStatutBadge = (status: string) => {
@@ -184,6 +186,11 @@ export default function Home() {
               {stats.refuse} Refusées
             </p>
           </div>
+        </div>
+        {/* 📊 Graphiques */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <DonutChart />
+          <ApplicationTrends />
         </div>
 
         {/* Table */}
