@@ -27,7 +27,7 @@
 ## 🛠️ Stack technique
 
 - **Frontend** : [Next.js](https://nextjs.org/) + [Tailwind CSS](https://tailwindcss.com/)  
-- **Base de données** : [Prisma](https://www.prisma.io/) + PostgreSQL  
+- **Base de données** : [Prisma](https://www.prisma.io/) 
 - **Backend scraping** *(à venir)* : Python (BeautifulSoup / Playwright)  
 - **Hébergement** *(prévu)* : Vercel pour le front, Railway/Supabase pour la base  
 
