@@ -19,7 +19,7 @@ export async function GET(req: Request) {
     where.society = { contains: society.toLowerCase() };
     }
   if (status) {
-    where.status = status;
+    where.status = { contains: status.toLowerCase() };
   }
   if (date) {
     // si tu veux exact match
