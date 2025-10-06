@@ -123,21 +123,21 @@ export default function Home() {
               value={stats.enAttente}
               color="#FF8C00"
               bgColor="#FFF7E6"
-              spinSpeed="2.5s"
+              spinSpeed="2s"
             />
             <KpiCard
               title="Acceptées"
               value={stats.accepte}
               color="#22C55E"
               bgColor="#DCFCE7"
-              spinSpeed="3s"
+              spinSpeed="2s"
             />
             <KpiCard
               title="Refusées"
               value={stats.refuse}
               color="#EF4444"
               bgColor="#FEE2E2"
-              spinSpeed="3.5s"
+              spinSpeed="2s"
             />
           </div>
 

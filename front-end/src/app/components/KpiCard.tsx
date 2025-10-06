@@ -29,7 +29,7 @@ export default function KpiCard({
           className="absolute inset-0 rounded-full border-4 border-t-transparent animate-spin-slow"
           style={{
             borderColor: `${color} transparent ${color} transparent`,
-            animation: `spin ${spinSpeed} linear infinite`,
+            animation: `spin ${spinSpeed} linear`,
           }}
         ></div>
       </div>
