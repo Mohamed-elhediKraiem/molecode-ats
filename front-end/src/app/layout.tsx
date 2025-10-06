@@ -25,7 +25,7 @@ export default function RootLayout({
     <html lang="fr" className={inter.variable}>
       <body className="bg-[#F5F7FA] text-text-light font-display antialiased">
         {/* Header global */}
-        <header className="sticky top-0 z-10 flex h-16 items-center justify-between bg-white px-6 shadow-md rounded-b-xl">
+        <header className=" top-0 z-10 flex h-16 items-center justify-between bg-white px-6 shadow-md rounded-b-xl">
           <div className="flex items-center gap-3">
             <span className="material-symbols-outlined text-primary text-3xl rotate-12">
               work
