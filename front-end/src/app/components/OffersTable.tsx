@@ -46,8 +46,9 @@ export default function OffersTable({
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
-  // --- Récupération des offres depuis l'API ---
+  // --- Charger les offres ---
   const fetchOffers = async () => {
     const query = new URLSearchParams({
       page: String(page),
@@ -60,7 +61,6 @@ export default function OffersTable({
 
     const res = await fetch(`/api/posts?${query.toString()}`);
     const result = await res.json();
-
     setOffers(result.data);
     setTotalPages(result.meta.totalPages);
     setTotal(result.meta.total);
@@ -70,7 +70,28 @@ export default function OffersTable({
     fetchOffers();
   }, [page, limit, filters]);
 
-  // --- Utilitaires d'affichage ---
+  // --- Mettre à jour le statut dans la BDD ---
+  const updateStatus = async (id: string, newStatus: string) => {
+    try {
+      await fetch(`/api/posts/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus.toLowerCase() }),
+      });
+
+      // mettre à jour localement
+      setOffers((prev) =>
+        prev.map((offer) =>
+          offer.id === id ? { ...offer, status: newStatus } : offer
+        )
+      );
+      setEditingId(null);
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour du statut :", error);
+    }
+  };
+
+  // --- Utilitaires d’affichage ---
   const truncateText = (text: string, maxLength: number) =>
     text && text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
 
@@ -87,9 +108,10 @@ export default function OffersTable({
     }
   };
 
+  const statusOptions = ["en attente", "accepté", "refusé"];
+
   return (
     <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-      {/* --- Tableau des offres --- */}
       <table className="w-full text-sm">
         <thead className="bg-gray-100">
           <tr>
@@ -129,14 +151,32 @@ export default function OffersTable({
                     {getSiteName(offer.url)}
                   </a>
                 </td>
+
                 <td className="py-3 px-6">
-                  <span
-                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatutBadge(
-                      offer.status
-                    )}`}
-                  >
-                    {offer.status}
-                  </span>
+                  {editingId === offer.id ? (
+                    <select
+                      autoFocus
+                      defaultValue={offer.status}
+                      onChange={(e) => updateStatus(offer.id, e.target.value)}
+                      onBlur={() => setEditingId(null)}
+                      className="rounded-md border border-gray-300 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                      {statusOptions.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt.charAt(0).toUpperCase() + opt.slice(1)}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <span
+                      onClick={() => setEditingId(offer.id)}
+                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium cursor-pointer hover:opacity-80 ${getStatutBadge(
+                        offer.status
+                      )}`}
+                    >
+                      {offer.status}
+                    </span>
+                  )}
                 </td>
               </tr>
             ))
@@ -150,7 +190,6 @@ export default function OffersTable({
         </tbody>
       </table>
 
-      {/* --- Pagination + options --- */}
       <div className="flex flex-col sm:flex-row items-center justify-between p-4 border-t border-gray-200 text-sm text-gray-600 gap-3">
         <span>
           Page {page} / {totalPages} — {offers.length} affichées sur {total}
