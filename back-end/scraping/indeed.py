@@ -1,21 +1,20 @@
 import requests
 from selectolax.parser import HTMLParser
-from bs4 import BeautifulSoup
-import re
-
-def clean_text(text: str) -> str:
-    """Nettoie le texte (supprime les espaces et balises inutiles)."""
-    if not text:
-        return ""
-    text = re.sub(r"\s+", " ", text.strip())
-    return text
+from models.job import Job
 
 def scrape_indeed(url: str):
-    """Scrape une offre Indeed et retourne un JSON minimal propre."""
     headers = {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-                      "AppleWebKit/537.36 (KHTML, like Gecko) "
-                      "Chrome/125.0.0.0 Safari/537.36"
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/125.0.0.0 Safari/537.36"
+        ),
+        "Accept-Language": "fr-FR,fr;q=0.9",
+        "Referer": "https://www.google.com/",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Connection": "keep-alive",
+        "DNT": "1",
+        "Upgrade-Insecure-Requests": "1",
     }
 
     try:
@@ -25,26 +24,20 @@ def scrape_indeed(url: str):
         return {"error": f"Erreur réseau : {e}"}
 
     tree = HTMLParser(response.text)
+    title = company = description = None
 
     # Extraction du titre
     title_node = tree.css_first("h1")
-    title = clean_text(title_node.text()) if title_node else None
+    if title_node:
+        title = title_node.text(strip=True)
 
-    # Nom de l'entreprise
     company_node = tree.css_first(".jobsearch-InlineCompanyRating div")
-    company = clean_text(company_node.text()) if company_node else None
+    if company_node:
+        company = company_node.text(strip=True)
 
-    # Description
     desc_el = tree.css_first("#jobDescriptionText")
     if desc_el:
-        raw_html = desc_el.html
-        soup = BeautifulSoup(raw_html, "html.parser")
-        description = clean_text(soup.get_text(separator="\n"))
-    else:
-        description = None
-
-    if not title and not description:
-        return {"error": "Impossible de détecter les informations sur la page"}
+        description = desc_el.text(separator="\n").strip()
 
     return {
         "title": title,

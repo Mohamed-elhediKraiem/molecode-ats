@@ -11,7 +11,7 @@ import {
   CalendarDays,
   CheckCircle2,
 } from "lucide-react";
-import { toast, Toaster } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 
 export default function NewCandidaturePage() {
   const router = useRouter();
