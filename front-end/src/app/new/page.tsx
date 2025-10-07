@@ -10,6 +10,7 @@ import {
   Type,
   CalendarDays,
   CheckCircle2,
+  AlertTriangle,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 
@@ -25,35 +26,42 @@ export default function NewCandidaturePage() {
 
   const [loading, setLoading] = useState(false);
 
-  // 🔍 Remplissage automatique depuis une URL
+  // --- Remplissage automatique depuis l’URL ---
   const fetchMetadata = async (url: string) => {
     if (!url) return;
     setLoading(true);
     toast.loading("Analyse du lien en cours...");
 
     try {
-      const res = await fetch(`/api/scrape?url=${encodeURIComponent(url)}`);
+      // ✅ Appel à ton backend Python
+      const res = await fetch(
+        `http://localhost:8000/scrape?url=${encodeURIComponent(url)}`
+      );
+      if (!res.ok) throw new Error("Erreur du serveur scraping");
+
       const data = await res.json();
       toast.dismiss();
 
-      if (data?.title || data?.society) {
+      if (data?.title || data?.company) {
         setFormData((prev) => ({
           ...prev,
           title: data.title || prev.title,
-          society: data.society || prev.society,
+          society: data.company || prev.society,
         }));
         toast.success("Données récupérées depuis le lien !");
       } else {
         toast.error("Impossible d’extraire les informations.");
       }
-    } catch {
+    } catch (err) {
+      toast.dismiss();
       toast.error("Erreur lors de l’analyse du lien.");
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  // ✉️ Envoi de la candidature
+  // --- Envoi de la candidature ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -91,6 +99,15 @@ export default function NewCandidaturePage() {
           <SendHorizonal className="text-purple-700" />
           Nouvelle candidature
         </h1>
+
+        {/* ⚠️ Avertissement */}
+        <div className="flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-700 text-sm mb-6">
+          <AlertTriangle className="w-4 h-4" />
+          <span>
+            Le remplissage automatique ne fonctionne que pour{" "}
+            <strong>LinkedIn</strong> et <strong>Welcome to the Jungle</strong>.
+          </span>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* URL */}

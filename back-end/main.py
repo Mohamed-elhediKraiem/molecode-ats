@@ -1,10 +1,20 @@
 from fastapi import FastAPI, Query
+from fastapi.middleware.cors import CORSMiddleware
 from scraping.wttj import scrape_wttj
 from scraping.linkedin import scrape_linkedin
 from scraping.cadremploi import scrape_cadremploi
 
 
 app = FastAPI(title="MoleCode ATS Scraper", version="1.4")
+
+# ✅ Autoriser les requêtes depuis ton frontend Next.js
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],  # autorise GET, POST, etc.
+    allow_headers=["*"],  # autorise tous les headers
+)
 
 @app.get("/")
 def root():

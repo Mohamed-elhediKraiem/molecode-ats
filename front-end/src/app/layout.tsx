@@ -26,15 +26,15 @@ export default function RootLayout({
   return (
     <html lang="fr" className={inter.variable}>
       <body className="bg-[#F5F7FA] text-text-light font-display antialiased">
-        {/* ✅ Header global */}
+        {/* Header global */}
         <Header />
 
-        {/* ✅ Contenu principal */}
+        {/* Contenu principal */}
         <main className="p-6">{children}</main>
 
-        {/* ✅ Toaster global (notifications) */}
+        {/* Toaster global (notifications) */}
         <Toaster
-          position="top-right"
+          position="bottom-center"
           toastOptions={{
             style: {
               borderRadius: "12px",
