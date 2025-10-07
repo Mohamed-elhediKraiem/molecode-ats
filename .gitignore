@@ -20,3 +20,25 @@ prisma/generated
 # Logs
 logs
 *.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.db
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# FastAPI / Uvicorn
+*.pid
+*.log
+
+# Pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
