@@ -1,6 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Trash2 } from "lucide-react";
+import ConfirmModal from "./ConfirmModal";
+import { toast } from "react-hot-toast";
 
 interface Offer {
   id: string;
@@ -47,6 +50,7 @@ export default function OffersTable({
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
+  const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
 
   // --- Récupération des offres depuis l'API ---
   const fetchOffers = async () => {
@@ -71,6 +75,20 @@ export default function OffersTable({
     fetchOffers();
   }, [page, limit, filters]);
 
+  // --- Suppression d'une offre ---
+  const handleDelete = async (id: string) => {
+    try {
+      const res = await fetch(`/api/posts/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Erreur serveur");
+
+      toast.success("Candidature supprimée !");
+      setSelectedOffer(null);
+      fetchOffers();
+    } catch {
+      toast.error("Échec de la suppression");
+    }
+  };
+
   const truncateText = (text: string, maxLength: number) =>
     text && text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
 
@@ -88,7 +106,16 @@ export default function OffersTable({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+    <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden relative">
+      {/* --- Modal de confirmation --- */}
+      <ConfirmModal
+        isOpen={!!selectedOffer}
+        onCancel={() => setSelectedOffer(null)}
+        onConfirm={() => selectedOffer && handleDelete(selectedOffer.id)}
+        message={`Supprimer la candidature "${selectedOffer?.title}" ?`}
+      />
+
+      {/* --- Tableau --- */}
       <table className="w-full text-sm">
         <thead className="bg-gray-100">
           <tr>
@@ -106,6 +133,9 @@ export default function OffersTable({
             </th>
             <th className="py-3 px-6 text-left font-semibold text-gray-600">
               Statut
+            </th>
+            <th className="py-3 px-6 text-center font-semibold text-gray-600">
+              Actions
             </th>
           </tr>
         </thead>
@@ -140,12 +170,21 @@ export default function OffersTable({
                   </td>
                   <td className="py-3 px-6">
                     <span
-                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatutBadge(
+                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium cursor-pointer ${getStatutBadge(
                         offer.status
                       )}`}
                     >
                       {offer.status}
                     </span>
+                  </td>
+                  <td className="py-3 px-6 text-center">
+                    <button
+                      onClick={() => setSelectedOffer(offer)}
+                      className="p-2 text-gray-600 hover:bg-red-50 rounded-full transition cursor-pointer"
+                      title="Supprimer"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </td>
                 </motion.tr>
               ))
@@ -156,7 +195,7 @@ export default function OffersTable({
                 exit={{ opacity: 0 }}
               >
                 <td
-                  colSpan={5}
+                  colSpan={6}
                   className="text-center py-6 text-gray-500 italic"
                 >
                   Aucune candidature trouvée avec ces filtres.
@@ -167,7 +206,7 @@ export default function OffersTable({
         </tbody>
       </table>
 
-      {/* Pagination */}
+      {/* --- Pagination --- */}
       <div className="flex flex-col sm:flex-row items-center justify-between p-4 border-t border-gray-200 text-sm text-gray-600 gap-3">
         <span>
           Page {page} / {totalPages} — {offers.length} affichées sur {total}
