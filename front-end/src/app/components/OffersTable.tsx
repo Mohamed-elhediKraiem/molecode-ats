@@ -82,6 +82,7 @@ export default function OffersTable({
       if (!res.ok) throw new Error("Erreur serveur");
 
       toast.success("Candidature supprimée !");
+      setOffers((prev) => prev.filter((offer) => offer.id !== id));
       setSelectedOffer(null);
       fetchOffers();
     } catch {

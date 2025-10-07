@@ -1,6 +1,9 @@
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
+// ====================
+// PATCH : modifier un post
+// ====================
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   try {
     const id = parseInt(params.id, 10);
@@ -29,5 +32,32 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     return new Response(JSON.stringify({ message: error.message }), {
       status: 500,
     });
+  }
+}
+
+// ====================
+// DELETE : supprimer un post
+// ====================
+export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+  try {
+    const id = parseInt(params.id, 10);
+    if (isNaN(id)) {
+      console.error("❌ ID invalide :", params.id);
+      return new Response("ID invalide", { status: 400 });
+    }
+
+    const existingPost = await prisma.post.findUnique({ where: { id } });
+    if (!existingPost) {
+      return new Response(JSON.stringify({ error: "Candidature introuvable" }), { status: 404 });
+    }
+
+    await prisma.post.delete({ where: { id } });
+
+    return new Response(JSON.stringify({ message: "Candidature supprimée avec succès" }), {
+      status: 200,
+    });
+  } catch (error) {
+    console.error("❌ Erreur DELETE /posts/[id] :", error);
+    return new Response(JSON.stringify({ error: "Erreur serveur" }), { status: 500 });
   }
 }
