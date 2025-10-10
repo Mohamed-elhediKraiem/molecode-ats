@@ -6,6 +6,7 @@ import ConfirmModal from "./ConfirmModal";
 import { toast } from "react-hot-toast";
 
 interface Offer {
+  statusEditing: any;
   id: string;
   title: string;
   society: string;
@@ -170,14 +171,70 @@ export default function OffersTable({
                     </a>
                   </td>
                   <td className="py-3 px-6">
-                    <span
-                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium cursor-pointer ${getStatutBadge(
-                        offer.status
-                      )}`}
-                    >
-                      {offer.status}
-                    </span>
+                    {offer.statusEditing ? (
+                      <select
+                        value={offer.status}
+                        onChange={async (e) => {
+                          const newStatus = e.target.value;
+                          try {
+                            const res = await fetch(`/api/posts/${offer.id}`, {
+                              method: "PATCH",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ status: newStatus }),
+                            });
+
+                            if (!res.ok) throw new Error("Erreur mise à jour");
+                            toast.success("Statut mis à jour !");
+                            fetchOffers(); // 🔁 recharger la liste
+                          } catch (error) {
+                            toast.error("Échec de la mise à jour");
+                          } finally {
+                            // on désactive le mode édition
+                            setOffers((prev) =>
+                              prev.map((o) =>
+                                o.id === offer.id
+                                  ? { ...o, statusEditing: false }
+                                  : o
+                              )
+                            );
+                          }
+                        }}
+                        onBlur={() =>
+                          setOffers((prev) =>
+                            prev.map((o) =>
+                              o.id === offer.id
+                                ? { ...o, statusEditing: false }
+                                : o
+                            )
+                          )
+                        }
+                        className="rounded-lg border border-gray-300 px-2 py-1 text-sm focus:ring-1 focus:ring-purple-400"
+                      >
+                        <option value="en attente">En attente</option>
+                        <option value="accepté">Accepté</option>
+                        <option value="refusé">Refusé</option>
+                      </select>
+                    ) : (
+                      <span
+                        onClick={() =>
+                          setOffers((prev) =>
+                            prev.map((o) =>
+                              o.id === offer.id
+                                ? { ...o, statusEditing: true }
+                                : o
+                            )
+                          )
+                        }
+                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium cursor-pointer hover:opacity-80 transition ${getStatutBadge(
+                          offer.status
+                        )}`}
+                        title="Modifier le statut"
+                      >
+                        {offer.status}
+                      </span>
+                    )}
                   </td>
+
                   <td className="py-3 px-6 text-center">
                     <button
                       onClick={() => setSelectedOffer(offer)}

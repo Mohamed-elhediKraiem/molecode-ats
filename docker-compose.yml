@@ -1,0 +1,11 @@
+version: "3.8"
+services:
+  molecode:
+    build: .
+    container_name: molecode_full
+    ports:
+      - "3000:3000"
+      - "8000:8000"
+    environment:
+      - NODE_ENV=production
+    restart: always
