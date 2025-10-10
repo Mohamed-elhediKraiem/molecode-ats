@@ -18,4 +18,5 @@ model Post {
   url          String
   status       String
   creationDate DateTime
+  userId       String
 }

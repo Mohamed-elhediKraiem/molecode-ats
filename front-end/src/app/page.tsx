@@ -1,162 +1,51 @@
 "use client";
-import { useEffect, useState } from "react";
-import DonutChart from "./components/DonutChart";
-import ApplicationTrends from "./components/LineChart";
-import KpiCard from "./components/KpiCard";
-import OffersTable from "./components/OffersTable";
-import FiltersPanel from "./components/FiltersPanel";
-import { BarChart3, Briefcase } from "lucide-react";
 
-// ---- Styles utilitaires ---- //
-const getStatutBadge = (status: string) => {
-  switch (status) {
-    case "accepté":
-      return "bg-green-100 text-green-700 border border-green-300";
-    case "refusé":
-      return "bg-red-100 text-red-700 border border-red-300";
-    case "en attente":
-      return "bg-yellow-100 text-yellow-700 border border-yellow-300";
-    default:
-      return "bg-gray-100 text-gray-700 border border-gray-300";
-  }
-};
+import { useUser } from "@clerk/nextjs";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
 
-export default function Home() {
-  const [offers, setOffers] = useState<any[]>([]);
-  const [limit, setLimit] = useState(10);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+export default function HomePage() {
+  const { isSignedIn } = useUser();
+  const router = useRouter();
 
-  // Stats globales
-  const [stats, setStats] = useState({
-    total: 0,
-    enAttente: 0,
-    accepte: 0,
-    refuse: 0,
-  });
-
-  // Filtres
-  const [filters, setFilters] = useState({
-    title: "",
-    society: "",
-    date: "",
-    status: "",
-  });
-
-  // Récupération des offres (avec pagination + filtres)
-  const fetchOffers = async (page: number, limit: number, filters: any) => {
-    const query = new URLSearchParams({
-      page: String(page),
-      limit: String(limit),
-      title: filters.title || "",
-      society: filters.society || "",
-      date: filters.date || "",
-      status: filters.status || "",
-    });
-
-    const res = await fetch(`/api/posts?${query.toString()}`);
-    const result = await res.json();
-
-    setOffers(result.data);
-    setTotalPages(result.meta.totalPages);
-  };
-
-  // Récupération des stats (avec filtres)
-  const fetchStats = async (filters: any) => {
-    const query = new URLSearchParams({
-      title: filters.title || "",
-      society: filters.society || "",
-      date: filters.date || "",
-      status: filters.status || "",
-    });
-
-    const res = await fetch(`/api/posts/stats?${query.toString()}`);
-    const result = await res.json();
-    setStats(result);
-  };
-
-  // ⚡ Recharge offres + stats quand filtres changent
+  // 🔁 Si l'utilisateur est déjà connecté → redirection automatique
   useEffect(() => {
-    fetchOffers(page, limit, filters);
-    fetchStats(filters);
-  }, [
-    page,
-    limit,
-    filters.title,
-    filters.society,
-    filters.date,
-    filters.status,
-  ]);
-
-  const handleFilterChange = (updatedFilters: any) => {
-    setFilters(updatedFilters);
-  };
+    if (isSignedIn) router.push("/dashboard");
+  }, [isSignedIn]);
 
   return (
-    <div className="min-h-screen bg-[#F5F7FA] font-display text-[#333]">
-      <main className="max-w-[100rem] mx-auto p-6 grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-6">
-        {/* Panneau de filtres latéral */}
-        <aside className="hidden lg:block sticky top-6 h-fit">
-          <FiltersPanel filters={filters} onFilterChange={setFilters} />
-        </aside>
+    <main className="flex flex-col justify-center items-center min-h-screen bg-gray-50 text-center">
+      <Image
+        src="/logo.png"
+        alt="MoleCode Logo"
+        width={500}
+        height={500}
+        className="rounded-md mb-10"
+      />
+      <h1 className="text-4xl font-bold mb-4">
+        Bienvenue sur MoleCode <span className="text-purple-700">ATS</span> 👋
+      </h1>
+      <p className="text-gray-600 mb-8 max-w-md">
+        Gérez toutes vos candidatures simplement. Connectez-vous pour accéder à
+        votre espace personnel.
+      </p>
 
-        {/* Contenu principal */}
-        <section className="flex flex-col gap-8">
-          <h1 className="flex items-center gap-3 text-3xl font-extrabold text-gray-900">
-            <BarChart3 className="w-8 h-8 text-[#6A0572]" />
-            <span>Dashboard : Suivi des candidatures</span>
-          </h1>
-          {/* KPI Cards */}
-          <h2 className="text-2xl font-extrabold text-gray-900 border-l-4 border-[#6A0572] pl-3">
-            Indicateurs clés
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <KpiCard
-              title="Total candidatures"
-              value={stats.total}
-              color="#6A0572"
-              bgColor="#F3E8FF"
-              spinSpeed="2s"
-            />
-            <KpiCard
-              title="En attente"
-              value={stats.enAttente}
-              color="#FF8C00"
-              bgColor="#FFF7E6"
-              spinSpeed="2s"
-            />
-            <KpiCard
-              title="Acceptées"
-              value={stats.accepte}
-              color="#22C55E"
-              bgColor="#DCFCE7"
-              spinSpeed="2s"
-            />
-            <KpiCard
-              title="Refusées"
-              value={stats.refuse}
-              color="#EF4444"
-              bgColor="#FEE2E2"
-              spinSpeed="2s"
-            />
-          </div>
-
-          {/* Graphiques */}
-          <h2 className="text-2xl font-extrabold text-gray-900 border-l-4 border-[#6A0572] pl-3">
-            Analyse des candidatures
-          </h2>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <DonutChart filters={filters} />
-            <ApplicationTrends filters={filters} />
-          </div>
-
-          {/* Tableau */}
-          <h2 className="text-2xl font-extrabold text-gray-900 border-l-4 border-[#6A0572] pl-3">
-            Détail des candidatures
-          </h2>
-          <OffersTable filters={filters} limit={limit} setLimit={setLimit} />
-        </section>
-      </main>
-    </div>
+      <div className="flex gap-4">
+        <Link
+          href="/sign-in"
+          className="px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition"
+        >
+          Se connecter
+        </Link>
+        <Link
+          href="/sign-up"
+          className="px-6 py-3 border border-purple-600 text-purple-600 rounded-xl hover:bg-purple-50 transition"
+        >
+          S’inscrire
+        </Link>
+      </div>
+    </main>
   );
 }

@@ -1,15 +1,20 @@
 "use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useUser, UserButton } from "@clerk/nextjs";
 
 export default function Header() {
   const pathname = usePathname();
+  const { isSignedIn } = useUser();
 
   const navLinks = [
-    { name: "Dashboard", href: "/" },
+    { name: "Dashboard", href: "/dashboard" },
     { name: "Nouvelle candidature", href: "/new" },
   ];
+
+  if (!isSignedIn) return null;
 
   return (
     <header className="sticky top-0 z-20 flex h-16 items-center justify-between bg-white px-6 shadow-md border-b border-gray-100">
@@ -27,7 +32,7 @@ export default function Header() {
         </h1>
       </div>
 
-      {/* --- Navigation --- */}
+      {/* --- Navigation principale --- */}
       <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
         {navLinks.map((link) => {
           const isActive = pathname === link.href;
@@ -47,17 +52,10 @@ export default function Header() {
         })}
       </nav>
 
-      {/* --- Avatar utilisateur --- 
-      <div className="flex items-center gap-4">
-        <Image
-          src="/avatar.png"
-          alt="Utilisateur MoleCode"
-          width={36}
-          height={36}
-          className="rounded-full border-2 border-purple-600 cursor-pointer hover:scale-110 transition-transform"
-        />
+      {/* --- Zone utilisateur (avatar Clerk) --- */}
+      <div className="flex items-center">
+        <UserButton afterSignOutUrl="/" />
       </div>
-      */}
     </header>
   );
 }
