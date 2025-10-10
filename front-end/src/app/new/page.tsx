@@ -81,7 +81,7 @@ export default function NewCandidaturePage() {
 
       if (res.ok) {
         toast.success("Candidature ajoutée avec succès !");
-        setTimeout(() => router.push("/"), 1500);
+        setTimeout(() => router.push("/dashboard"), 1500);
       } else {
         toast.error("Erreur lors de l’ajout de la candidature.");
       }

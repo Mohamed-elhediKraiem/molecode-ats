@@ -41,8 +41,7 @@ export default function RootLayout({
         },
         elements: {
           // 🎨 --- Conteneur global
-          rootBox:
-            "flex justify-center items-center min-h-screen bg-[#F5F7FA] font-display",
+          rootBox: "flex justify-center items-center00 bg-[#F5F7FA] font-display",
 
           // 🎨 --- Carte principale (le bloc de connexion)
           card: "shadow-xl border border-gray-200 bg-white rounded-2xl p-6 sm:p-8",
@@ -72,7 +71,7 @@ export default function RootLayout({
 
           // 🎨 --- Boutons sociaux
           socialButtonsIconButton:
-            "border-gray-300 rounded-lg hover:bg-gray-100 transition w-10 h-10",
+            "border-gray-300 rounded-lg hover:bg-gray-100 transition",
         },
       }}
     >

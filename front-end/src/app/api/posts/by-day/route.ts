@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { currentUser } from "@clerk/nextjs/server"; // ✅ Import Clerk pour authentifier l’utilisateur
 
 const prisma = new PrismaClient();
 
@@ -14,47 +15,67 @@ const daysOfWeek = [
 
 // Helper pour convertir une date JS en jour de la semaine (Lundi=0)
 function getDayName(date: Date) {
-  const index = (date.getDay() + 6) % 7;
+  const index = (date.getDay() + 6) % 7; // Décale pour que Lundi soit le premier
   return daysOfWeek[index];
 }
 
 export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
+  try {
+    // ✅ Récupération de l'utilisateur connecté via Clerk
+    const user = await currentUser();
+    if (!user) {
+      return new Response(
+        JSON.stringify({ error: "Non autorisé — utilisateur non connecté." }),
+        { status: 401 }
+      );
+    }
 
-  const title = searchParams.get("title")?.toLowerCase() || "";
-  const society = searchParams.get("society")?.toLowerCase() || "";
-  const date = searchParams.get("date") || "";
-  const status = searchParams.get("status")?.toLowerCase() || "";
+    const userId = user.id;
 
-  const where: any = {};
+    // 🔍 Lecture des paramètres
+    const { searchParams } = new URL(req.url);
+    const title = searchParams.get("title")?.toLowerCase() || "";
+    const society = searchParams.get("society")?.toLowerCase() || "";
+    const date = searchParams.get("date") || "";
+    const status = searchParams.get("status")?.toLowerCase() || "";
 
-  // Filtres
-  if (title) where.title = { contains: title };
-  if (society) where.society = { contains: society };
-  if (status) where.status = { equals: status };
-  if (date) where.creationDate = new Date(date);
+    // 🔒 Filtrage avec userId
+    const where: any = { userId };
 
-  // Récupération des candidatures filtrées
-  const posts = await prisma.post.findMany({
-    where,
-    select: { creationDate: true },
-  });
+    if (title) where.title = { contains: title };
+    if (society) where.society = { contains: society };
+    if (status) where.status = { equals: status };
+    if (date) where.creationDate = new Date(date);
 
-  // Comptage par jour de la semaine
-  const grouped: Record<string, number> = {};
-  posts.forEach((p) => {
-    const day = getDayName(p.creationDate);
-    grouped[day] = (grouped[day] || 0) + 1;
-  });
+    // 📊 Récupération des candidatures filtrées
+    const posts = await prisma.post.findMany({
+      where,
+      select: { creationDate: true },
+    });
 
-  // Structuration pour le chart
-  const chartData = daysOfWeek.map((day) => ({
-    name: day,
-    value: grouped[day] || 0,
-  }));
+    // 📅 Comptage par jour de la semaine
+    const grouped: Record<string, number> = {};
+    posts.forEach((p) => {
+      const day = getDayName(p.creationDate);
+      grouped[day] = (grouped[day] || 0) + 1;
+    });
 
-  return Response.json({
-    total: posts.length,
-    data: chartData,
-  });
+    // 🔁 Structuration pour affichage du chart
+    const chartData = daysOfWeek.map((day) => ({
+      name: day,
+      value: grouped[day] || 0,
+    }));
+
+    // ✅ Réponse finale
+    return Response.json({
+      total: posts.length,
+      data: chartData,
+    });
+  } catch (error) {
+    console.error("❌ Erreur GET /api/posts/by-day :", error);
+    return new Response(
+      JSON.stringify({ error: "Erreur serveur interne." }),
+      { status: 500 }
+    );
+  }
 }

@@ -35,7 +35,6 @@ def scrape_linkedin(url: str):
     # 🔹 Nom de l’entreprise
     # ---------------------
     company_tag = None
-    # Priorité : lien vers /company/
     for a in soup.find_all("a", href=True):
         if "/company/" in a["href"]:
             company_tag = a
@@ -45,13 +44,25 @@ def scrape_linkedin(url: str):
     company_url = company_tag["href"] if company_tag else None
 
     # ---------------------
-    # 🔹 Titre du poste
+    # 🔹 Titre du poste (robuste)
     # ---------------------
-    # Recherche du <p> contenant le titre (souvent visible dans une <p> juste après la div entreprise)
-    title_tag = soup.find("p", string=re.compile(r".+"))
-    title = clean_text(title_tag.get_text()) if title_tag else None
+    title = None
 
-    # Par sécurité : fallback sur meta title
+    # 1️⃣ Recherche explicite d’un <p>, <h1> ou <h2> contenant un titre pertinent
+    title_candidates = soup.find_all(["h1", "h2", "p"], string=True)
+
+    for t in title_candidates:
+        text = clean_text(t.get_text())
+        # Filtrer les éléments non pertinents
+        if len(text) > 3 and not any(x in text.lower() for x in [
+            "il y a", "candidature", "promu", "linkedin", "recruteur"
+        ]):
+            # Heuristique : mots fréquents dans un intitulé de poste
+            if re.search(r"(h/f|engineer|développeur|developer|expert|manager|analyst|consultant|chef|lead|senior|architect)", text, re.IGNORECASE):
+                title = text
+                break
+
+    # 2️⃣ Fallback : meta og:title (ex: <meta property="og:title" content="EXPERT POWER BI (H/F)">)
     if not title:
         meta_title = soup.find("meta", property="og:title")
         if meta_title and meta_title.get("content"):
@@ -60,10 +71,8 @@ def scrape_linkedin(url: str):
     # ---------------------
     # 🔹 Description du poste
     # ---------------------
-    # LinkedIn masque souvent le contenu complet, mais on peut récupérer le bloc <section> s’il est présent
     desc_tag = soup.find("section", {"class": re.compile("show-more-less-html__markup|description")})
     if not desc_tag:
-        # Certains templates utilisent des div textuelles
         desc_tag = soup.find("div", {"class": re.compile("description|show-more")})
     description = clean_text(desc_tag.get_text(separator="\n")) if desc_tag else None
 

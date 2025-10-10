@@ -27,13 +27,13 @@ export default function Header() {
           height={50}
           className="rounded-md"
         />
-        <h1 className="text-lg font-extrabold text-gray-900 tracking-tight">
+        <h1 className="text-xl font-extrabold text-gray-900 tracking-tight">
           MoleCode <span className="text-purple-700">ATS</span>
         </h1>
       </div>
 
       {/* --- Navigation principale --- */}
-      <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
+      <nav className="hidden md:flex items-center gap-6 text-xl font-medium">
         {navLinks.map((link) => {
           const isActive = pathname === link.href;
           return (
@@ -42,7 +42,7 @@ export default function Header() {
               href={link.href}
               className={`transition-colors ${
                 isActive
-                  ? "text-purple-700 font-semibold border-b-2 border-purple-700 pb-1"
+                  ? "text-purple-700 font-semibold "
                   : "text-gray-600 hover:text-purple-700"
               }`}
             >

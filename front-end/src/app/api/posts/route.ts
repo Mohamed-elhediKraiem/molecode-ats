@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 
 const prisma = new PrismaClient();
 
@@ -8,15 +8,17 @@ const prisma = new PrismaClient();
 // ====================
 export async function GET(req: Request) {
   // ✅ Récupération de l'ID utilisateur Clerk
-  const { userId } = auth();
+  const user  = await currentUser();
+  
 
-  if (!userId) {
+  if (!user) {
     return new Response(
       JSON.stringify({ error: "Non autorisé — utilisateur manquant." }),
       { status: 401 }
     );
   }
-
+  const userId = user.id;
+  
   const { searchParams } = new URL(req.url);
   const page = parseInt(searchParams.get("page") || "1", 10);
   const limit = parseInt(searchParams.get("limit") || "10", 10);
@@ -51,25 +53,27 @@ export async function GET(req: Request) {
     },
   });
 }
-
 // ====================
 // POST : ajouter un post pour l'utilisateur connecté
 // ====================
 export async function POST(req: Request) {
   try {
     // ✅ Authentification Clerk
-    const { userId } = auth();
-
-    if (!userId) {
+    const user = await currentUser(); // 🔥 ajout du await
+    if (!user) {
       return new Response(
         JSON.stringify({ error: "Non autorisé — utilisateur manquant." }),
         { status: 401 }
       );
     }
 
+    const userId = user.id;
+
+    // ✅ Lecture du corps de la requête
     const body = await req.json();
     const { title, society, url, status } = body;
 
+    // ✅ Validation minimale des champs
     if (!title || !society || !url) {
       return new Response(
         JSON.stringify({
@@ -87,18 +91,20 @@ export async function POST(req: Request) {
         url,
         status: (status || "en attente").toLowerCase(),
         creationDate: new Date(),
-        userId, // 🔥 association à l'utilisateur connecté
+        userId, // 🔥 association directe à l'utilisateur connecté
       },
     });
 
+    // ✅ Réponse standardisée
     return Response.json({
       message: "Candidature ajoutée avec succès",
       post: newPost,
     });
   } catch (error) {
     console.error("❌ Erreur API POST /posts :", error);
-    return new Response(JSON.stringify({ error: "Erreur serveur" }), {
-      status: 500,
-    });
+    return new Response(
+      JSON.stringify({ error: "Erreur serveur interne." }),
+      { status: 500 }
+    );
   }
 }
