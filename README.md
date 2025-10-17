@@ -59,9 +59,14 @@ Elle permet de **centraliser**, **analyser** et **automatiser** la gestion de te
 #### Frontend `.env.local`
 
 ```bash
-NEXT_PUBLIC_API_BASE_URL=https://molecode-ats.onrender.com
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
-CLERK_SECRET_KEY=sk_test_...
+DATABASE_URL="file:./dev.db"
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_cXVpZXQtY29kLTE0LmNsZXJrLmFjY291bnRzLmRldiQ
+CLERK_SECRET_KEY=sk_test_juBcD6h1vloXWIIFoBUrC7MjPLeR9idGnbREWtmFZM
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/dashboard
+NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/dashboard
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
 ```
 
 #### Backend `.env`
