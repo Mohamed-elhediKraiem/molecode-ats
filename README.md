@@ -10,7 +10,6 @@
   <a href="https://render.com/"><img src="https://img.shields.io/badge/Render-46E3B7?style=for-the-badge&logo=render&logoColor=black" /></a>
   <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" /></a>
 </p>
-![Dashboard MoleCode ATS](./capture.png)
 
 🚀 **MoleCode ATS** (Applicant Tracking System) est une application web personnelle de suivi de candidatures.  
 Elle permet de **centraliser**, **analyser** et **automatiser** la gestion de tes candidatures grâce à une interface moderne et un backend de scraping intelligent.
