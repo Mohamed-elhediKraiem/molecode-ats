@@ -1,3 +1,4 @@
+![Capture MoleCode ATS](./capture.png)
 # 🦫 MoleCode ATS
 
 <p align="center">
